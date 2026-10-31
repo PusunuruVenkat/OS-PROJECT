@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SwiftShare - High-Concurrency File Distribution Server</title>
+  <meta name="description" content="SwiftShare is a high-concurrency file distribution server with non-blocking streaming IO, live transfer telemetry, and modern file management.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ============================================== -->
+  <!-- 1. LEFT SIDEBAR                                -->
+  <!-- ============================================== -->
+  <aside class="app-sidebar" id="appSidebar">
+    <!-- Brand Header -->
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+          <path d="M12 12v9"/>
+          <path d="m8 17 4 4 4-4"/>
+        </svg>
+      </div>
+      <span class="brand-name">SwiftShare</span>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="dashboard" title="Main Dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="9" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+          <rect x="14" y="12" width="7" height="9" rx="1.5"/>
+          <rect x="3" y="16" width="7" height="5" rx="1.5"/>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+
+      <button class="nav-item" data-page="upload" title="Upload Files">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Upload Files</span>
+      </button>
+
+      <button class="nav-item" data-page="my-files" title="My Files Manager">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>My Files</span>
+      </button>
+
+      <button class="nav-item" data-page="download-center" title="Download Center">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Download Center</span>
+      </button>
+
+      <button class="nav-item" data-page="transfer-monitor" title="Transfer Monitor">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>Transfer Monitor</span>
+        <span class="sidebar-badge" id="sidebarActiveBadge">17</span>
+      </button>
+
+      <button class="nav-item" data-page="settings" title="Server & Account Settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Mini Info -->
+    <div class="sidebar-footer-widget">
+      <div class="sf-row">
+        <span>Storage Usage</span>
+        <strong id="sidebarStorageText">2.4 GB / 10 GB</strong>
+      </div>
+      <div class="sf-bar-track">
+        <div class="sf-bar-fill" id="sidebarStorageBar" style="width: 24%;"></div>
+      </div>
+      <div class="sf-status">
+        <span class="pulse-green"></span>
+        <span>High-Concurrency Active</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ============================================== -->
+  <!-- MAIN APPLICATION CONTENT AREA                  -->
+  <!-- ============================================== -->
+  <div class="app-main">
+
+
+
+    <!-- ================= TOP NAVBAR ================= -->
+    <header class="top-navbar">
+      <div class="top-left">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
+        <!-- Brand visible on mobile -->
+        <div class="navbar-mobile-brand">
+          <span class="brand-dot"></span>
+          <span>SwiftShare</span>
+        </div>
+      </div>
+
+      <!-- Centered Global Search Bar -->
+      <div class="top-search-container">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="globalSearchInput" placeholder="Search files..." autocomplete="off">
+          <button class="search-clear-btn" id="searchClearBtn" style="display: none;" title="Clear search">&times;</button>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="top-right-actions">
+        <!-- Server Status Pill -->
+        <div class="server-status-pill" id="navServerStatus">
+          <span class="status-indicator"></span>
+          <span class="status-text">Server Online</span>
+        </div>
+
+        <!-- Notification Bell Dropdown -->
+        <div class="dropdown-wrapper">
+          <button class="icon-circle-btn" id="btnNotifications" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="badge-dot" id="notifBadgeDot"></span>
+          </button>
+          
+          <div class="dropdown-menu notif-menu" id="notifDropdown">
+            <div class="dropdown-header">
+              <strong>Server Notifications</strong>
+              <button class="btn-text-link" id="btnClearNotifs">Clear</button>
+            </div>
+            <div class="notif-list" id="notifList">
+              <div class="notif-item unread">
+                <span class="notif-dot green"></span>
+                <div class="notif-content">
+                  <p class="notif-text">High-concurrency streaming engine initialized with 24 worker connections.</p>
+                  <span class="notif-time">Just now</span>
+                </div>
+              </div>
+              <div class="notif-item">
+                <span class="notif-dot blue"></span>
+                <div class="notif-content">
+                  <p class="notif-text">Storage sync complete: 128 files indexed across distributed buckets.</p>
+                  <span class="notif-time">10 min ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Dropdown -->
+        <div class="dropdown-wrapper">
+          <button class="user-profile-btn" id="btnUserProfile">
+            <div class="user-avatar-circle">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <span class="user-name" id="topbarUserName">Admin</span>
+            <svg class="dropdown-caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          <div class="dropdown-menu user-menu" id="userDropdown">
+            <div class="user-menu-header">
+              <strong id="menuUserFullName">Administrator</strong>
+              <span id="menuUserEmail">admin@example.com</span>
+            </div>
+            <div class="menu-divider"></div>
+            <button class="dropdown-menu-item" data-action="goto-profile">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Profile Settings</span>
+            </button>
+            <button class="dropdown-menu-item" data-action="goto-server-settings">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                <line x1="6" y1="6" x2="6.01" y2="6"/>
+                <line x1="6" y1="18" x2="6.01" y2="18"/>
+              </svg>
+              <span>Server Config</span>
+            </button>
+            <div class="menu-divider"></div>
+            <button class="dropdown-menu-item text-danger" data-action="reseed-demo">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              <span>Reset &amp; Reseed Demo Data</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= SCROLLABLE PAGE VIEW CONTAINER ================= -->
+    <main class="page-container">
+
+      <!-- ======================================================== -->
+      <!-- PAGE 1: DASHBOARD                                       -->
+      <!-- ======================================================== -->
+      <section class="page-view active" id="page-dashboard">
+        <!-- Welcome Header -->
+        <div class="welcome-header">
+          <div>
+            <h1 class="page-title">Welcome to SwiftShare</h1>
+            <p class="page-subtitle">High-Concurrency File Distribution Server</p>
+          </div>
+          <div class="server-badge-pill green" id="dashServerStatus">
+            <span class="status-dot"></span>
+            <span class="status-text">Server Online</span>
+          </div>
+        </div>
+
+        <!-- 4 KPI Stat Cards Row -->
+        <div class="kpi-cards-grid">
+          <!-- Card 1: Total Files -->
+          <div class="stat-card" data-navigate="my-files">
+            <div class="stat-icon-box blue">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Total Files</span>
+              <div class="stat-number" id="kpiTotalFiles">128</div>
+            </div>
+          </div>
+
+          <!-- Card 2: Total Downloads -->
+          <div class="stat-card" data-navigate="download-center">
+            <div class="stat-icon-box green">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Total Downloads</span>
+              <div class="stat-number" id="kpiTotalDownloads">540</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Active Users -->
+          <div class="stat-card" data-navigate="transfer-monitor">
+            <div class="stat-icon-box orange">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Active Users</span>
+              <div class="stat-number" id="kpiActiveUsers">24</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Storage Used -->
+          <div class="stat-card" data-navigate="settings">
+            <div class="stat-icon-box purple">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Storage Used</span>
+              <div class="stat-number" id="kpiStorageUsed">2.4 GB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Bottom Row: Server Activity Chart & Recent Files -->
+        <div class="dashboard-split-grid">
+          <!-- Left: Server Activity Chart -->
+          <div class="content-card chart-card">
+            <div class="card-header-row">
+              <h2 class="card-heading">Server Activity</h2>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot blue"></span> Uploads</span>
+                <span class="legend-item"><span class="legend-dot green"></span> Downloads</span>
+              </div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="serverActivityCanvas" height="200"></canvas>
+            </div>
+          </div>
+
+          <!-- Right: Recent Files List -->
+          <div class="content-card recent-files-card">
+            <div class="card-header-row">
+              <h2 class="card-heading">Recent Files</h2>
+              <button class="btn-text-link" id="btnDashViewAllFiles">View All</button>
+            </div>
+            <div class="recent-files-list" id="dashRecentFilesList">
+              <!-- Dynamically populated or seeded -->
+              <div class="recent-file-item">
+                <div class="file-type-icon pdf">PDF</div>
+                <div class="rf-info">
+                  <div class="rf-name">Project_Report.pdf</div>
+                  <div class="rf-meta">2.5 MB</div>
+                </div>
+                <span class="rf-time">2 min ago</span>
+              </div>
+              <div class="recent-file-item">
+                <div class="file-type-icon image">IMG</div>
+                <div class="rf-info">
+                  <div class="rf-name">College_Image.png</div>
+                  <div class="rf-meta">1.2 MB</div>
+                </div>
+                <span class="rf-time">10 min ago</span>
+              </div>
+              <div class="recent-file-item">
+                <div class="file-type-icon doc">DOC</div>
+                <div class="rf-info">
+                  <div class="rf-name">Notes.docx</div>
+                  <div class="rf-meta">800 KB</div>
+                </div>
+                <span class="rf-time">30 min ago</span>
+              </div>
+              <div class="recent-file-item">
+                <div class="file-type-icon video">MP4</div>
+                <div class="rf-info">
+                  <div class="rf-name">Video.mp4</div>
+                  <div class="rf-meta">120 MB</div>
+                </div>
+                <span class="rf-time">1 hour ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- PAGE 2: UPLOAD FILES                                    -->
+      <!-- ======================================================== -->
+      <section class="page-view" id="page-upload">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Upload Files</h1>
+            <p class="page-subtitle">Upload multiple files to share with others</p>
+          </div>
+        </div>
+
+        <!-- Big Drag-and-Drop Area -->
+        <div class="upload-dropzone-card" id="mainDropZone">
+          <div class="cloud-icon-circle">
+            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+              <path d="M12 12v9"/>
+              <path d="m8 17 4 4 4-4"/>
+            </svg>
+          </div>
+          <h2 class="dropzone-main-text">Drag and drop files here</h2>
+          <p class="dropzone-sub-text">or click to browse</p>
+          <button class="btn-primary pill" id="btnBrowseFiles" type="button">Choose Files</button>
+          <input type="file" id="fileUploadInput" multiple style="display: none;">
+        </div>
+
+        <!-- Uploading Files Section -->
+        <div class="uploading-section-card">
+          <div class="uploading-header">
+            <h3 class="uploading-title">Uploading Files (<span id="uploadingCount">3</span>)</h3>
+          </div>
+
+          <div class="uploading-list" id="uploadingFilesList">
+            <!-- Upload Item 1: Project_Report.pdf (80%) -->
+            <div class="upload-progress-row" id="row-up-1">
+              <div class="file-type-icon pdf">PDF</div>
+              <div class="up-meta">
+                <div class="up-name">Project_Report.pdf</div>
+                <div class="up-size">2.5 MB</div>
+              </div>
+              <div class="up-bar-wrapper">
+                <div class="up-bar-track">
+                  <div class="up-bar-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+              <span class="up-percent">80%</span>
+              <button class="up-cancel-btn" title="Cancel upload">&times;</button>
+            </div>
+
+            <!-- Upload Item 2: College_Image.png (100% Complete) -->
+            <div class="upload-progress-row completed" id="row-up-2">
+              <div class="file-type-icon image">IMG</div>
+              <div class="up-meta">
+                <div class="up-name">College_Image.png</div>
+                <div class="up-size">1.2 MB</div>
+              </div>
+              <div class="up-bar-wrapper">
+                <div class="up-bar-track">
+                  <div class="up-bar-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+              <span class="up-percent">100%</span>
+              <span class="up-complete-check">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#10b981" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </div>
+
+            <!-- Upload Item 3: Video.mp4 (45%) -->
+            <div class="upload-progress-row" id="row-up-3">
+              <div class="file-type-icon video">MP4</div>
+              <div class="up-meta">
+                <div class="up-name">Video.mp4</div>
+                <div class="up-size">120 MB</div>
+              </div>
+              <div class="up-bar-wrapper">
+                <div class="up-bar-track">
+                  <div class="up-bar-fill" style="width: 45%;"></div>
+                </div>
+              </div>
+              <span class="up-percent">45%</span>
+              <button class="up-cancel-btn" title="Cancel upload">&times;</button>
+            </div>
+          </div>
+
+          <!-- Bottom Alert Banner -->
+          <div class="upload-status-banner green">
+            <span class="banner-icon-check">✔</span>
+            <span>Files are uploading... You can add more files.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- PAGE 3: MY FILES                                        -->
+      <!-- ======================================================== -->
+      <section class="page-view" id="page-my-files">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">My Files</h1>
+            <p class="page-subtitle">Manage your uploaded files</p>
+          </div>
+          <button class="btn-primary pill" id="btnMyFilesUploadNew">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Upload New Files</span>
+          </button>
+        </div>
+
+        <!-- Filter and Search Toolbar -->
+        <div class="table-filter-toolbar">
+          <div class="filter-search-box">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="myFilesSearchInput" placeholder="Search files...">
+          </div>
+
+          <div class="filter-dropdowns">
+            <select id="myFilesTypeSelect" class="styled-select">
+              <option value="All Types">All Types</option>
+              <option value="PDF">PDF</option>
+              <option value="Image">Image</option>
+              <option value="Document">Document</option>
+              <option value="Video">Video</option>
+              <option value="Presentation">Presentation</option>
+              <option value="Archive">Archive</option>
+              <option value="Code">Code</option>
+            </select>
+
+            <select id="myFilesSortSelect" class="styled-select">
+              <option value="date-desc">Sort by Date</option>
+              <option value="name-asc">Sort by Name</option>
+              <option value="size-desc">Sort by Size (Largest)</option>
+              <option value="size-asc">Sort by Size (Smallest)</option>
+              <option value="downloads-desc">Sort by Downloads</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Files Data Table Card -->
+        <div class="content-card table-card">
+          <div class="table-container">
+            <table class="data-table" id="myFilesTable">
+              <thead>
+                <tr>
+                  <th style="width: 32%;">Name</th>
+                  <th>Size</th>
+                  <th>Type</th>
+                  <th>Upload Date</th>
+                  <th>Downloads</th>
+                  <th style="text-align: right; width: 120px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="myFilesTableBody">
+                <!-- Dynamically populated files -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-footer">
+            <div class="pagination-controls" id="myFilesPagination">
+              <button class="page-btn prev" disabled>&lt;</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">4</button>
+              <button class="page-btn">5</button>
+              <button class="page-btn next">&gt;</button>
+            </div>
+            <div class="page-limit-selector">
+              <span>Show</span>
+              <select id="myFilesPageLimit" class="mini-select">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="All">All</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- PAGE 4: DOWNLOAD CENTER                                 -->
+      <!-- ======================================================== -->
+      <section class="page-view" id="page-download-center">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Download Center</h1>
+            <p class="page-subtitle">Browse and download shared files</p>
+          </div>
+        </div>
+
+        <!-- Filter and Search Toolbar -->
+        <div class="table-filter-toolbar">
+          <div class="filter-search-box">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="dcSearchInput" placeholder="Search files...">
+          </div>
+
+          <div class="filter-dropdowns">
+            <select id="dcTypeSelect" class="styled-select">
+              <option value="All Types">All Types</option>
+              <option value="PDF">PDF</option>
+              <option value="Image">Image</option>
+              <option value="Document">Document</option>
+              <option value="Video">Video</option>
+              <option value="Presentation">Presentation</option>
+              <option value="Archive">Archive</option>
+            </select>
+
+            <select id="dcSortSelect" class="styled-select">
+              <option value="Most Popular" selected>Most Popular</option>
+              <option value="newest">Newest First</option>
+              <option value="size-desc">Largest First</option>
+              <option value="name">Name (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Download Center Table Card -->
+        <div class="content-card table-card">
+          <div class="table-container">
+            <table class="data-table" id="downloadCenterTable">
+              <thead>
+                <tr>
+                  <th style="width: 40%;">Name</th>
+                  <th>Size</th>
+                  <th>Type</th>
+                  <th>Downloads</th>
+                  <th style="text-align: right; width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="downloadCenterTableBody">
+                <!-- Dynamically populated files with Download buttons -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-footer">
+            <div class="pagination-controls" id="dcPagination">
+              <button class="page-btn prev" disabled>&lt;</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">4</button>
+              <button class="page-btn">5</button>
+              <button class="page-btn next">&gt;</button>
+            </div>
+            <div class="page-limit-selector">
+              <span>Show</span>
+              <select id="dcPageLimit" class="mini-select">
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="All">All</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- PAGE 5: TRANSFER MONITOR                                -->
+      <!-- ======================================================== -->
+      <section class="page-view" id="page-transfer-monitor">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Transfer Monitor</h1>
+            <p class="page-subtitle">Monitor active uploads and downloads</p>
+          </div>
+          <button class="btn-primary pill" id="btnSimulateConcurrency">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>Simulate High Concurrency (5 Streams)</span>
+          </button>
+        </div>
+
+        <!-- 4 Metric Cards Row -->
+        <div class="kpi-cards-grid monitor-metrics">
+          <!-- Card 1: Active Uploads -->
+          <div class="stat-card">
+            <div class="stat-icon-box blue">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Active Uploads</span>
+              <div class="stat-number" id="tmActiveUploads">5</div>
+            </div>
+          </div>
+
+          <!-- Card 2: Active Downloads -->
+          <div class="stat-card">
+            <div class="stat-icon-box green">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Active Downloads</span>
+              <div class="stat-number" id="tmActiveDownloads">12</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Total Connections -->
+          <div class="stat-card">
+            <div class="stat-icon-box orange">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 14 14"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Total Connections</span>
+              <div class="stat-number" id="tmTotalConnections">24</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Transfer Speed -->
+          <div class="stat-card">
+            <div class="stat-icon-box purple">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-title">Transfer Speed</span>
+              <div class="stat-number" id="tmTransferSpeed">128 MB/s</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer Filter Tabs -->
+        <div class="transfer-tabs-row">
+          <button class="transfer-tab active" data-tab="active">Active Transfers</button>
+          <button class="transfer-tab" data-tab="completed">Completed</button>
+          <button class="transfer-tab" data-tab="failed">Failed</button>
+        </div>
+
+        <!-- Transfers Table Card -->
+        <div class="content-card table-card">
+          <div class="table-container">
+            <table class="data-table" id="transfersTable">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">File Name</th>
+                  <th>Type</th>
+                  <th style="width: 25%;">Progress</th>
+                  <th>Speed</th>
+                  <th>Status</th>
+                  <th>Time Left</th>
+                </tr>
+              </thead>
+              <tbody id="transfersTableBody">
+                <!-- Dynamically rendered active transfer streams -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- PAGE 6: SETTINGS                                        -->
+      <!-- ======================================================== -->
+      <section class="page-view" id="page-settings">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-subtitle">Manage your account and server settings</p>
+          </div>
+        </div>
+
+        <!-- Settings Sub-tabs -->
+        <div class="settings-nav-tabs">
+          <button class="s-tab-btn active" data-stab="profile">Profile</button>
+          <button class="s-tab-btn" data-stab="storage">Storage</button>
+          <button class="s-tab-btn" data-stab="security">Security</button>
+          <button class="s-tab-btn" data-stab="server">Server</button>
+          <button class="s-tab-btn" data-stab="preferences">Preferences</button>
+        </div>
+
+        <!-- TAB CONTENT: PROFILE -->
+        <div class="settings-content-pane active" id="stab-profile">
+          <div class="settings-grid-2">
+            <!-- Left: Profile Information Form -->
+            <div class="content-card">
+              <h2 class="card-heading">Profile Information</h2>
+              <form id="profileForm" class="settings-form">
+                <div class="form-group">
+                  <label for="profUsername">Username</label>
+                  <input type="text" id="profUsername" value="Admin" class="form-input">
+                </div>
+
+                <div class="form-group">
+                  <label for="profEmail">Email</label>
+                  <input type="email" id="profEmail" value="admin@example.com" class="form-input">
+                </div>
+
+                <div class="form-group">
+                  <label for="profFullName">Full Name</label>
+                  <input type="text" id="profFullName" value="Administrator" class="form-input">
+                </div>
+
+                <div class="form-group">
+                  <label>Profile Picture</label>
+                  <div class="profile-pic-row">
+                    <div class="profile-avatar-preview">
+                      <svg viewBox="0 0 24 24" width="28" height="28" fill="#94a3b8">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                    <button type="button" class="btn-secondary small" id="btnChangeAvatar">Change</button>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="btnSaveProfile">Save Changes</button>
+              </form>
+            </div>
+
+            <!-- Right: Account Statistics Card -->
+            <div class="content-card">
+              <h2 class="card-heading">Account Statistics</h2>
+              <div class="account-stats-list">
+                <div class="acc-stat-item">
+                  <div class="acc-icon blue">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    </svg>
+                  </div>
+                  <div class="acc-info">
+                    <span class="acc-label">Total Files</span>
+                    <strong class="acc-val" id="accStatFiles">128</strong>
+                  </div>
+                </div>
+
+                <div class="acc-stat-item">
+                  <div class="acc-icon green">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                    </svg>
+                  </div>
+                  <div class="acc-info">
+                    <span class="acc-label">Total Downloads</span>
+                    <strong class="acc-val" id="accStatDownloads">540</strong>
+                  </div>
+                </div>
+
+                <div class="acc-stat-item">
+                  <div class="acc-icon purple">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                    </svg>
+                  </div>
+                  <div class="acc-info">
+                    <span class="acc-label">Storage Used</span>
+                    <strong class="acc-val" id="accStatStorage">2.4 GB</strong>
+                  </div>
+                </div>
+
+                <div class="acc-stat-item">
+                  <div class="acc-icon orange">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/>
+                      <line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                  </div>
+                  <div class="acc-info">
+                    <span class="acc-label">Member Since</span>
+                    <strong class="acc-val">May 2024</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: STORAGE -->
+        <div class="settings-content-pane" id="stab-storage">
+          <div class="content-card">
+            <h2 class="card-heading">Storage Allocation &amp; Cleanup</h2>
+            <p class="card-desc">Review disk consumption, clean temporary chunks, or rebuild storage index.</p>
+            <div class="storage-breakdown-bar">
+              <div class="s-segment documents" style="width: 35%;" title="Documents 35%"></div>
+              <div class="s-segment media" style="width: 45%;" title="Media & Video 45%"></div>
+              <div class="s-segment archives" style="width: 15%;" title="Archives 15%"></div>
+              <div class="s-segment other" style="width: 5%;" title="Other 5%"></div>
+            </div>
+            <div class="storage-legend-row">
+              <span class="s-legend"><span class="dot doc"></span> Documents (840 MB)</span>
+              <span class="s-legend"><span class="dot media"></span> Media (1.08 GB)</span>
+              <span class="s-legend"><span class="dot zip"></span> Archives (360 MB)</span>
+              <span class="s-legend"><span class="dot other"></span> Other (120 MB)</span>
+            </div>
+            <div class="form-actions-row" style="margin-top: 24px;">
+              <button class="btn-secondary" id="btnRecalculateStorage">Recalculate Disk Index</button>
+              <button class="btn-danger" id="btnClearTempUploads">Purge Incomplete Chunks</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: SERVER -->
+        <div class="settings-content-pane" id="stab-server">
+          <div class="content-card">
+            <h2 class="card-heading">High-Concurrency Server Engine Tuning</h2>
+            <p class="card-desc">Asynchronous socket buffer sizes, stream throttling, and concurrency limits.</p>
+            <form id="serverConfigForm" class="settings-form">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="cfgMaxConcurrency">Max Concurrent Connections</label>
+                  <input type="number" id="cfgMaxConcurrency" value="100" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label for="cfgChunkSize">Stream Chunk Buffer (KB)</label>
+                  <select id="cfgChunkSize" class="styled-select">
+                    <option value="64">64 KB (Low Memory)</option>
+                    <option value="256" selected>256 KB (Recommended)</option>
+                    <option value="512">512 KB (High Throughput)</option>
+                    <option value="1024">1024 KB (1 MB Ultra)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="cfgSpeedCap">Bandwidth Cap (MB/s)</label>
+                  <input type="number" id="cfgSpeedCap" value="1000" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label for="cfgPort">Server Port</label>
+                  <input type="text" id="cfgPort" value="3000" class="form-input" disabled>
+                </div>
+              </div>
+              <button type="submit" class="btn-primary">Apply Server Config</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: SECURITY & PREFERENCES -->
+        <div class="settings-content-pane" id="stab-security">
+          <div class="content-card">
+            <h2 class="card-heading">Access Control &amp; API Security</h2>
+            <p class="card-desc">Token authentication and CORS domain whitelist.</p>
+            <div class="form-group">
+              <label>API Key for Automated Distribution</label>
+              <div class="copy-input-row">
+                <input type="text" value="swf_live_948f20b38d61a998ce7" class="form-input" readonly id="apiKeyInput">
+                <button type="button" class="btn-secondary" id="btnCopyApiKey">Copy</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked id="chkAllowGuest">
+                <span>Allow anonymous direct file downloads (Public Distribution)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-content-pane" id="stab-preferences">
+          <div class="content-card">
+            <h2 class="card-heading">System Preferences</h2>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked id="chkSoundAlerts">
+                <span>Enable audio/visual notifications when downloads complete</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" checked id="chkLiveTelemetry">
+                <span>Stream real-time SSE telemetry updates to dashboard</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <strong>SwiftShare</strong> &middot; High-Concurrency File Distribution Server
+      </div>
+      <div class="footer-right">
+        <span class="footer-status-dot"></span>
+        <span id="footerServerStatus">Server: Online &middot; Port 3000 &middot; HTTP Range Stream IO</span>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<!-- ================= DOWNLOAD PROGRESS FLOATING TOAST ================= -->
+<div class="floating-download-toast" id="downloadToast" style="display: none;">
+  <div class="dl-toast-content">
+    <div class="dl-toast-top">
+      <div class="dl-toast-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563eb" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </div>
+      <div class="dl-toast-text">
+        <span class="dl-toast-title" id="toastFilename">Downloading file...</span>
+        <span class="dl-toast-sub" id="toastStatus">Asynchronous streaming in progress</span>
+      </div>
+      <span class="dl-toast-percent" id="toastPercent">0%</span>
+    </div>
+    <div class="dl-toast-bar-track">
+      <div class="dl-toast-bar-fill" id="toastProgressFill" style="width: 0%;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CONFIRMATION MODAL ================= -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <div class="modal-icon-danger">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ef4444" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        <line x1="10" y1="11" x2="10" y2="17"/>
+        <line x1="14" y1="11" x2="14" y2="17"/>
+      </svg>
+    </div>
+    <h3 class="modal-title">Delete File</h3>
+    <p class="modal-desc" id="confirmModalText">Are you sure you want to permanently delete this file from the distribution storage? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="btnCancelDelete">Cancel</button>
+      <button class="btn-danger" id="btnConfirmDelete">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SYSTEM TOAST ALERTS ================= -->
+<div class="toast-notifications-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

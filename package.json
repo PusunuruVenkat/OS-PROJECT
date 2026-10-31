@@ -1,0 +1,26 @@
+{
+  "name": "high-concurrency-file-distribution-server",
+  "version": "1.0.0",
+  "description": "A complete, modern, responsive full-stack High-Concurrency File Distribution Server built with Node.js, Express, and Multer.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "file-server",
+    "concurrency",
+    "express",
+    "multer",
+    "streaming",
+    "zero-copy",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
